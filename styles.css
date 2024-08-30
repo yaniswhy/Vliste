@@ -13,17 +13,20 @@ body {
     padding: 20px;
     border-radius: 15px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    width: 350px;
-    max-width: 90%;
+    width: 90%;
+    max-width: 400px;
     display: flex;
     flex-direction: column;
     align-items: center;
     position: relative;
+    box-sizing: border-box;
 }
 
 .voice-control {
     position: absolute;
-    bottom: -25px;
+    bottom: -30px;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 .record-button {
@@ -31,12 +34,13 @@ body {
     border: none;
     border-radius: 50%;
     color: white;
-    font-size: 30px;
+    font-size: 24px;
     width: 60px;
     height: 60px;
     cursor: pointer;
     outline: none;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s ease;
 }
 
 .record-button.recording {
@@ -50,12 +54,13 @@ body {
     width: 100%;
     max-height: 400px;
     overflow-y: auto;
+    box-sizing: border-box;
 }
 
 .task-list li {
     background-color: #e9ecef;
     border: 1px solid #ced4da;
-    padding: 15px;
+    padding: 12px 15px;
     margin-bottom: 10px;
     display: flex;
     align-items: center;
@@ -80,5 +85,26 @@ body {
     color: #888;
 }
 
+/* Media Queries for Responsive Design */
+@media (max-width: 600px) {
+    .container {
+        width: 100%;
+        padding: 15px;
+        border-radius: 10px;
+    }
 
+    .record-button {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+    }
 
+    .task-list li {
+        padding: 10px 12px;
+    }
+
+    .task-list li input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+    }
+}
