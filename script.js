@@ -9,24 +9,18 @@ const recordButton = document.getElementById('recordButton');
 const taskList = document.getElementById('taskList');
 
 let isRecording = false;
-let interimTask = null;
-let finalTranscript = "";
+let currentTask = null;
+let lastProcessedFinalTranscript = '';  // Store the last processed final transcript
+let interimTranscript = '';  // Store interim transcript
 
 // Toggle recording state
 recordButton.addEventListener('click', () => {
     if (isRecording) {
         recognition.stop();
-        if (interimTask) {
-            const taskText = finalTranscript.trim();
-            interimTask.querySelector('.task-text').textContent = taskText;
-            interimTask.style.color = '#000';
-            saveTaskToFirebase(taskText);  // Save the finalized task to Firebase
-            interimTask = null;
-            finalTranscript = "";  // Clear final transcript
-        }
+        finalizeTask();  // Finalize the task when stopping recording
     } else {
-        finalTranscript = "";  // Reset transcript when starting a new recording
         recognition.start();
+        startNewTask();  // Start a new task when starting recording
     }
     isRecording = !isRecording;
     recordButton.classList.toggle('recording');
@@ -34,38 +28,78 @@ recordButton.addEventListener('click', () => {
 
 // Handle interim and final results
 recognition.addEventListener('result', (event) => {
-    let interimTranscript = "";
-    for (let i = event.resultIndex; i < event.results.length; ++i) {
-        interimTranscript += event.results[i][0].transcript;
+    let finalTranscript = '';
+
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+        const transcript = event.results[i][0].transcript;
         if (event.results[i].isFinal) {
-            finalTranscript += event.results[i][0].transcript + " ";
+            finalTranscript += transcript;
+        } else {
+            interimTranscript = transcript;
         }
     }
 
-    if (!interimTask) {
-        interimTask = addTask(interimTranscript, true);
-    } else {
-        interimTask.querySelector('.task-text').textContent = finalTranscript + interimTranscript;
+    if (finalTranscript && finalTranscript !== lastProcessedFinalTranscript) {
+        updateTask(finalTranscript.trim(), true);  // Update with final text only if it's new
+        lastProcessedFinalTranscript = finalTranscript.trim();  // Update the last processed final transcript
+    } else if (interimTranscript) {
+        updateTask(interimTranscript.trim(), false);  // Update with interim text
     }
 });
 
 // Handle recognition end
 recognition.addEventListener('end', () => {
     if (isRecording) {
-        recognition.start();  // Continue listening if still recording
+        recognition.start(); // Continue listening if button is still active
     } else {
         recordButton.classList.remove('recording');
     }
 });
 
+// Start a new task
+function startNewTask() {
+    currentTask = addTask('', true);  // Start with an empty task
+}
+
+// Update the current task with the transcript
+function updateTask(text, isFinal) {
+    if (currentTask) {
+        const taskContent = currentTask.querySelector('.task-text');
+        if (isFinal) {
+            // Replace interim content with final content
+            taskContent.textContent = text;
+            currentTask.style.color = '#000';  // Turn text black when final
+        } else {
+            // Update interim content
+            taskContent.textContent = text;
+        }
+    }
+}
+
+// Finalize the current task
+function finalizeTask() {
+    if (currentTask) {
+        currentTask.style.color = '#000';  // Finalize the task text
+        currentTask = null;  // Reset for the next task
+        lastProcessedFinalTranscript = '';  // Reset the last transcript
+        interimTranscript = '';  // Reset interim transcript
+    }
+}
+
 // Add task to the list, optionally mark as interim
 function addTask(taskText, isInterim = false) {
     const listItem = document.createElement('li');
+    listItem.className = 'task-item';  // Add class for animation
+
     const checkBox = document.createElement('input');
     checkBox.type = 'checkbox';
     checkBox.addEventListener('change', (e) => {
         if (e.target.checked) {
             listItem.classList.add('checked');
+            // Remove task after animation ends
+            setTimeout(() => {
+                listItem.remove();
+            }, 1500);  // Delay must match animation duration
         } else {
             listItem.classList.remove('checked');
         }
@@ -74,39 +108,20 @@ function addTask(taskText, isInterim = false) {
     const taskContent = document.createElement('span');
     taskContent.className = 'task-text';
     taskContent.textContent = taskText;
-
+    
     listItem.appendChild(checkBox);
     listItem.appendChild(taskContent);
 
-    listItem.style.color = isInterim ? '#888' : '#000';  // Light grey for interim text
+    // If it's an interim task, style it differently
+    if (isInterim) {
+        listItem.style.color = '#888';  // Light grey for interim text
+    }
 
     taskList.appendChild(listItem);
-    taskList.scrollTop = taskList.scrollHeight;  // Scroll to the bottom to show the new task
+
+    // Scroll to the bottom to show the newly added task
+    taskList.scrollTop = taskList.scrollHeight;
 
     return listItem;
 }
-
-// Function to save task to Firebase
-function saveTaskToFirebase(taskText) {
-    const newTaskRef = push(ref(database, 'tasks'));
-    set(newTaskRef, {
-        text: taskText,
-        completed: false
-    });
-}
-
-// Load tasks from Firebase
-window.addEventListener('load', () => {
-    const tasksRef = ref(database, 'tasks');
-    onValue(tasksRef, (snapshot) => {
-        taskList.innerHTML = '';  // Clear current list
-        snapshot.forEach((childSnapshot) => {
-            const taskData = childSnapshot.val();
-            const listItem = addTask(taskData.text);
-            if (taskData.completed) {
-                listItem.querySelector('input[type="checkbox"]').checked = true;
-                listItem.classList.add('checked');
-            }
-        });
-    });
-});
+    

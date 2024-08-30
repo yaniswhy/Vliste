@@ -14,7 +14,6 @@ body {
     border-radius: 15px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     width: 90%;
-    max-width: 400px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -88,19 +87,14 @@ body {
 /* Media Queries for Responsive Design */
 @media (max-width: 600px) {
     .container {
-        width: 100%;
+        width: 90%;
         padding: 15px;
         border-radius: 10px;
     }
 
-    .record-button {
-        width: 50px;
-        height: 50px;
-        font-size: 20px;
-    }
-
     .task-list li {
         padding: 10px 12px;
+        max-width: 90%;
     }
 
     .task-list li input[type="checkbox"] {
@@ -108,3 +102,19 @@ body {
         height: 18px;
     }
 }
+/* Define the animation for fading out the task */
+@keyframes fadeOut {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+}
+
+/* Apply the animation to tasks marked as checked */
+.task-item.checked {
+    animation: fadeOut 0.5s forwards;  /* Adjust timing as needed */
+}
+

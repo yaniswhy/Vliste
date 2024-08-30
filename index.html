@@ -5,9 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VListe</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database.js"></script>
-
 </head>
 <body>
     <div class="container">
@@ -16,25 +13,6 @@
             <button id="recordButton" class="record-button">🎤</button>
         </div>
     </div>
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
-import { getDatabase, ref, push, set, onValue, update } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
-
-// Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyD6DRpuBbTvzBbVIac8mFJ9dXj6diQ6zKg",
-  authDomain: "vliste-e6cee.firebaseapp.com",
-  projectId: "vliste-e6cee",
-  storageBucket: "vliste-e6cee.appspot.com",
-  messagingSenderId: "992271582401",
-  appId: "1:992271582401:web:2a8c67daf0608714b80040"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const database = getDatabase(app);
-
-      </script>
     <script src="script.js"></script>
 </body>
 </html>
